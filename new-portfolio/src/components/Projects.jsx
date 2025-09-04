@@ -1,6 +1,6 @@
 // components/Projects.jsx
 import React, { useEffect, useState } from 'react';
-import { fetchEntries } from '../services/service.js';
+import { fetchProjectEntries } from '../services/service.js';
 
 const filterOptions = ['All', 'School Projects', 'Games', 'Collaborative', 'Personal'];
 
@@ -9,17 +9,16 @@ export default function Projects() {
     const [activeFilter, setActiveFilter] = useState('All');
 
     useEffect(() => {
-        fetchEntries().then(entries => {
+        fetchProjectEntries().then(entries => {
             setProjects(entries);
         }).catch(error => {
             console.error("Error fetching projects:", error);
         })
-    })
+    }, []);
 
     const filteredProjects = activeFilter === 'All'
         ? projects
         : projects.filter(project => project.categories.includes(activeFilter));
-
     return (
         <section
             id="projects"
@@ -91,7 +90,9 @@ export default function Projects() {
 
 
                             {/* Hover overlay */}
-                            <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <div className="absolute inset-0 bg-black bg-opacity-60 flex flex-col
+                             items-center justify-center justify-around  w-full h-full
+                              opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                 <h3
                                     className="text-white font-semibold text-center px-4"
                                     style={{
@@ -101,6 +102,35 @@ export default function Projects() {
                                 >
                                     {project.projectDescription}
                                 </h3>
+                                <div className='flex flex-row gap-3'>
+                                    {
+                                        project.links.map((link) => {                                            
+                                            return (
+                                                <a
+                                                    key={link.sys.id}
+                                                    className="flex items-center gap-2 text-white text-sm px-3 py-1 rounded transition-colors"
+                                                    style={{
+                                                        backgroundColor: link.fields?.linkBgcolor
+                                                    }}
+                                                    onMouseEnter={e => {
+                                                        e.currentTarget.style.backgroundColor = link.fields?.linkBgColorHover
+                                                    }}
+                                                    onMouseLeave={e => {
+                                                        e.currentTarget.style.backgroundColor = link.fields?.linkBgcolor
+                                                    }}
+                                                    href={link.fields?.url}
+                                                >
+                                                    <img
+                                                        src={`https:${link.fields.logo?.fields?.file?.url}`}
+                                                        alt={link.fields.logo?.fields?.title || link.fields?.name}
+                                                        className="w-5 h-5"
+                                                    />
+                                                    <span>{link.fields?.tag}</span>
+                                                </a>
+                                            );
+                                        })
+                                    }
+                                </div>
                             </div>
                         </div>
                     ))}

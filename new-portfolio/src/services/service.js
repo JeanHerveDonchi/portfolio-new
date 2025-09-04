@@ -1,8 +1,8 @@
 import { client } from "../data/content.js";
 
-export const fetchEntries = async () => {
+export const fetchProjectEntries = async () => {
     try {
-        const entries = await client.getEntries({
+        const entries = await client.withoutUnresolvableLinks.getEntries({
             content_type: 'projects',
         })
         return entries.items.map(entry => ({
@@ -14,15 +14,25 @@ export const fetchEntries = async () => {
             banner: entry.fields.projectBanner.fields
         }));
     } catch (error) {
-        throw `Error fetching entries for content type ${error.message}`;
+        throw new Error(`Error fetching entries for content type ${error.message}`);
     }
 }
 
-export const fetchAssets = async () => {
+export const fetchBlogPostEntries = async () => {
     try {
-        const assets = await client.withoutLinkResolution.withAllLocales.getAssets()
-        return assets.items;
+        const bpEntries = await client.withoutUnresolvableLinks.getEntries({
+            content_type: 'blogPost',
+        })
+        return bpEntries.items.map(entry => ({
+            id: entry.sys.id,
+            title: entry.fields.title,
+            coverImage: entry.fields.coverImage.fields,
+            category: entry.fields.category,
+            createdAt: entry.sys.createdAt,
+            updatedAt: entry.sys.updatedAt
+        }));
     } catch (error) {
-        throw `Error fetching assets for content type ${error.message}`;
+        throw new Error(`Error fetching entries for content type ${error.message}`);
     }
 }
+
