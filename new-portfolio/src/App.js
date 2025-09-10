@@ -1,25 +1,20 @@
 import './App.css';
-import Hero from './components/Hero';
-import About from './components/About';
-import Skills from './components/Skills';
-import Projects from './components/Projects';
-import Blogs from './components/Blogs';
-import Contact from './components/Contact';
-import Footer from './components/Footer';
-import Navbar from './components/Navbar';
+import Home from './pages/home';
+import BlogDetails from './pages/blogDetails';
+import { BrowserRouter as  Router, Routes, Route } from 'react-router-dom';
 
 function App() {
   return (
-    <>
-      <Navbar />
-      <Hero />
-      <About />
-      <Skills />
-      <Projects />
-      <Blogs />
-      <Contact />
-      <Footer />
-    </>
+   <div className='App'>
+      <Routes>
+        {/* Home Page Route */}
+        <Route path='/' element={<Home/>} />
+        {/* Blog Details route */}
+        <Route path='/blog/:id' element={<BlogDetails/>} />
+        {/* Page not found */}
+        <Route path="*" element={<div>Page Not Found</div>} />
+      </Routes>
+   </div>
   );
 }
 

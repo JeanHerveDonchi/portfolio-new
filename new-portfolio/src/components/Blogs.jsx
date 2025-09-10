@@ -1,6 +1,7 @@
 // components/Blogs.jsx
 import React, { useEffect, useState } from 'react';
 import { fetchBlogPostEntries } from '../services/service';
+import{ Link } from 'react-router-dom';
 
 
 
@@ -10,7 +11,6 @@ export default function Blogs() {
     const [blogPosts, setBlogPosts] = useState([]);
     useEffect(() => {
         fetchBlogPostEntries().then(entries => {
-            console.log(entries);
             setBlogPosts(entries);
         }).catch(error => {
             console.error("Error fetching projects:", error);
@@ -41,8 +41,14 @@ export default function Blogs() {
                 <div className="flex flex-col lg:flex-row items-start lg:items-center gap-6">
                     {/* Blog Cards */}
                     <div className="w-full lg:flex-1 grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {displayedBlogs.map((blog) => (
-                            <div key={blog.id} className="group cursor-pointer relative overflow-hidden rounded-lg w-full">
+                        {displayedBlogs
+                        .sort((a,b) => new Date(b.updatedAt) - new Date(a.updatedAt))
+                        .map((blog) => (
+                            <Link
+                                key={blog.id}
+                                to={`/blog/${blog.id}`}    
+                                className="group cursor-pointer relative overflow-hidden rounded-lg w-full"
+                            >
                                 {/* Blog banner image placeholder with more height and full width on mobile */}
                                 <div className="w-full h-56 bg-gray-400 flex items-center justify-center transition-all duration-300 group-hover:brightness-75 bg-center bg-cover"
                                     style={{
@@ -70,7 +76,7 @@ export default function Blogs() {
                                         {blog.category}
                                     </span>
                                 </div>
-                            </div>
+                            </Link>                                
                         ))}
                     </div>
 

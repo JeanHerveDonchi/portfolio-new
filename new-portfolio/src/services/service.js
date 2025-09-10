@@ -36,3 +36,27 @@ export const fetchBlogPostEntries = async () => {
     }
 }
 
+export const fetchBlogPostDetailsEntries = async (id) => {
+    try {
+        const bpEntries = await client.withoutUnresolvableLinks.getEntries({
+            content_type: 'blogPost',
+            'sys.id': id
+        })
+        if (bpEntries.items.length === 0) {
+            return null;
+        }
+        const entry = bpEntries.items[0];
+        return {
+            id: entry.sys.id,
+            title: entry.fields.title,
+            coverImage: entry.fields.coverImage,
+            category: entry.fields.category,
+            createdAt: entry.sys.createdAt,
+            updatedAt: entry.sys.updatedAt,
+            body: entry.fields.body
+        };
+    } catch (error) {
+        throw new Error(`Error fetching entries for content type ${error.message}`);
+    }
+}
+
