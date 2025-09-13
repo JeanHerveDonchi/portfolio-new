@@ -57,11 +57,11 @@ export default function Navbar() {
             {/* Brand Name */}
             <div className="navbar-brand">
                 <Link
-                key={navItems[0].id}
-                to={navItems[0].href} 
-                className="text-xl font-bold text-white">
+                    key={navItems[0].id}
+                    to={navItems[0].href}
+                    className="text-xl font-bold text-white">
                     Jean-Herve Donchi
-                </Link>
+                </Link> 
             </div>
 
             {/* Desktop Navigation */}
@@ -71,7 +71,7 @@ export default function Navbar() {
                     return (
                         <Link
                             key={item.id}
-                            to={`${item.href}`} 
+                            to={`${item.href}`}
                             onClick={() => handleNavClick(item.id)}
                             className="text-white px-4 py-2 rounded-full transition-all duration-300"
                             style={getNavItemStyle(isActive)}

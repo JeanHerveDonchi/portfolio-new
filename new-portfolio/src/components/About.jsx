@@ -30,7 +30,7 @@ export default function About() {
                     <p className="text-white leading-relaxed" style={{ fontSize: '15px' }}>
                         As a former Network Technician Associate, I got inspired by learning Python
                         for network automation. I now focus on building secure, scalable, and
-                        well-documented backend applications.
+                        well-documented full-stack applications.
                     </p>
                 </div>
             </div>

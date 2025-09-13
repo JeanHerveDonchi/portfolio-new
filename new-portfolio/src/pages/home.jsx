@@ -11,7 +11,7 @@ function Home() {
   useScrollToHash();
   return (
     <>
-      <Navbar />
+      <Navbar/>
       <Hero />
       <About />
       <Skills />

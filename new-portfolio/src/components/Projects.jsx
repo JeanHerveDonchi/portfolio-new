@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { fetchProjectEntries } from '../services/service.js';
 
-const filterOptions = ['All', 'School Projects', 'Games', 'Collaborative', 'Personal'];
+const filterOptions = ['All', 'Games', 'Collaborative', 'Personal'];
 
 export default function Projects() {
     const [projects, setProjects] = useState([]);
@@ -104,7 +104,7 @@ export default function Projects() {
                                 </h3>
                                 <div className='flex flex-row gap-3'>
                                     {
-                                        project.links.map((link) => {                                            
+                                        project.links.map((link) => {
                                             return (
                                                 <a
                                                     key={link.sys.id}
@@ -119,6 +119,8 @@ export default function Projects() {
                                                         e.currentTarget.style.backgroundColor = link.fields?.linkBgcolor
                                                     }}
                                                     href={link.fields?.url}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
                                                 >
                                                     <img
                                                         src={`https:${link.fields.logo?.fields?.file?.url}`}

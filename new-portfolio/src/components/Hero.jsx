@@ -41,6 +41,15 @@ export default function Hero() {
                                     e.target.style.backgroundColor = '#E37665';
                                     e.target.style.border = 'none';
                                 }}
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    const el = document.getElementById("contact");
+                                    if (el) {
+                                        el.scrollIntoView({behavior: "smooth"})
+                                    } else {
+                                        window.location.href = "/contact";
+                                    }
+                                }}
                             >
                                 Got a project?
                             </button>
