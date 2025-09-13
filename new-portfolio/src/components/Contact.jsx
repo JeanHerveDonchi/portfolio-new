@@ -1,5 +1,5 @@
 // components/Contact.jsx
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useEmail } from '../hooks/useEmail';
 
 export default function Contact() {
@@ -12,12 +12,45 @@ export default function Contact() {
         message: "",
     });
 
+    const [errors, setErrors] = useState({});
+    const [isValid, setIsValid] = useState(false);
+    const [showErrors, setShowErrors] = useState(false);
+
+    useEffect(() => {
+        const newErrors = {};
+
+        if (!formData.from_name.trim()) {
+            newErrors.from_name = "Name is required";
+        }
+
+        if (!formData.reply_to.trim()) {
+            newErrors.reply_to = "Email is required";
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.reply_to)) {
+            newErrors.reply_to = "Enter a valid email";
+        }
+
+        if (!formData.message.trim()) {
+            newErrors.message = "Message is required";
+        } else if (formData.message.length > 5000) {
+            newErrors.message = "Message must be less than 5000 characters";
+        }
+
+        setErrors(newErrors);
+        setIsValid(Object.keys(newErrors).length === 0);
+    }, [formData]);
+
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        //do not send if form is not valid
+        if (!isValid) {
+            setShowErrors(true);
+            return;
+        }
+
         send(formData).then(() => {
             setFormData({ from_name: "", reply_to: "", message: "" });
         });
@@ -65,6 +98,11 @@ export default function Contact() {
                                         fontFamily: 'Rethink Sans, sans-serif'
                                     }}
                                 />
+                                {
+                                    errors.from_name && showErrors && (
+                                        <p className='text-red-400 text-sm'>{errors.from_name}</p>
+                                    )
+                                }
                             </div>
 
                             <div>
@@ -82,6 +120,9 @@ export default function Contact() {
                                         fontFamily: 'Rethink Sans, sans-serif'
                                     }}
                                 />
+                                {errors.reply_to && showErrors && (
+                                    <p className="text-red-400 text-sm">{errors.reply_to}</p>
+                                )}
                             </div>
 
                             <div>
@@ -99,6 +140,9 @@ export default function Contact() {
                                         fontFamily: 'Rethink Sans, sans-serif'
                                     }}
                                 ></textarea>
+                                {errors.message && showErrors && (
+                                    <p className="text-red-400 text-sm">{errors.message}</p>
+                                )}
                             </div>
                         </form>
                     </div>
@@ -107,9 +151,10 @@ export default function Contact() {
                     <div className="flex justify-center">
                         <button
                             type="submit"
-                            disabled={isSending}
                             onClick={handleSubmit}
-                            className="text-white px-8 py-3 transition-all duration-300"
+                            className={`px-8 py-3 transition-all duration-300 rounded-md 
+                                bg-[#E37665] text-white hover:bg-transparent
+                                 hover:border-2 hover:border-[#E37665]"`}
                             style={{
                                 backgroundColor: '#E37665',
                                 fontFamily: 'Rethink Sans, sans-serif'

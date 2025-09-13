@@ -1,14 +1,17 @@
 // components/Blogs.jsx
 import React, { useEffect, useState } from 'react';
 import { fetchBlogPostEntries } from '../services/service';
-import{ Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 
 
 
 export default function Blogs() {
 
+    const [visibleCount, setVisibleCount] = useState(2);
+    const [allShown, setAllShown] = useState(false);
     const [blogPosts, setBlogPosts] = useState([]);
+
     useEffect(() => {
         fetchBlogPostEntries().then(entries => {
             setBlogPosts(entries);
@@ -18,7 +21,17 @@ export default function Blogs() {
     }, []);
 
     // Take only the first 2 blog posts
-    const displayedBlogs = blogPosts.slice(0, 2);
+    const displayedBlogs = blogPosts
+        .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
+        .slice(0, visibleCount);
+
+    const handleLoadMore = () => {
+        if (visibleCount >= blogPosts.length) {
+            setAllShown(true);
+        } else {
+            setVisibleCount(prev => prev * 2);
+        }
+    }
 
     return (
         <section
@@ -42,42 +55,41 @@ export default function Blogs() {
                     {/* Blog Cards */}
                     <div className="w-full lg:flex-1 grid grid-cols-1 md:grid-cols-2 gap-6">
                         {displayedBlogs
-                        .sort((a,b) => new Date(b.updatedAt) - new Date(a.updatedAt))
-                        .map((blog) => (
-                            <Link
-                                key={blog.id}
-                                to={`/blog/${blog.id}`}    
-                                className="group cursor-pointer relative overflow-hidden rounded-lg w-full"
-                            >
-                                {/* Blog banner image placeholder with more height and full width on mobile */}
-                                <div className="w-full h-56 bg-gray-400 flex items-center justify-center transition-all duration-300 group-hover:brightness-75 bg-center bg-cover"
-                                    style={{
-                                        backgroundImage: `url(${blog.coverImage?.file?.url ? `https:${blog.coverImage?.file?.url}` : 'https://via.placeholder.com/400x300'})`
-                                    }}
+                            .map((blog) => (
+                                <Link
+                                    key={blog.id}
+                                    to={`/blog/${blog.id}`}
+                                    className="group cursor-pointer relative overflow-hidden rounded-lg w-full"
                                 >
-                                    <span className="text-gray-700 text-sm bg-white/70 px-3 py-1 rounded">{blog.title}</span>
-                                </div>
-
-                                {/* Hover overlay */}
-                                <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                    <span
-                                        className="text-white font-medium"
+                                    {/* Blog banner image placeholder with more height and full width on mobile */}
+                                    <div className="w-full h-56 bg-gray-400 flex items-center justify-center transition-all duration-300 group-hover:brightness-75 bg-center bg-cover"
                                         style={{
-                                            fontSize: '16px',
-                                            fontFamily: 'Rethink Sans, sans-serif'
+                                            backgroundImage: `url(${blog.coverImage?.file?.url ? `https:${blog.coverImage?.file?.url}` : 'https://via.placeholder.com/400x300'})`
                                         }}
                                     >
-                                        Read Post
-                                    </span>
-                                </div>
-                                {/* Category label */}
-                                <div className="absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                    <span className="text-xs text-white bg-red-900 px-2 py-1 rounded">
-                                        {blog.category}
-                                    </span>
-                                </div>
-                            </Link>                                
-                        ))}
+                                        <span className="text-gray-700 text-sm bg-white/70 px-3 py-1 rounded">{blog.title}</span>
+                                    </div>
+
+                                    {/* Hover overlay */}
+                                    <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                        <span
+                                            className="text-white font-medium"
+                                            style={{
+                                                fontSize: '16px',
+                                                fontFamily: 'Rethink Sans, sans-serif'
+                                            }}
+                                        >
+                                            Read Post
+                                        </span>
+                                    </div>
+                                    {/* Category label */}
+                                    <div className="absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                        <span className="text-xs text-white bg-red-900 px-2 py-1 rounded">
+                                            {blog.category}
+                                        </span>
+                                    </div>
+                                </Link>
+                            ))}
                     </div>
 
                     <div className="lg:ml-6">
@@ -96,9 +108,18 @@ export default function Blogs() {
                                 e.target.style.backgroundColor = 'transparent';
                                 e.target.style.border = '2px solid #E37665';
                             }}
+                            onClick={handleLoadMore}
                         >
                             more
                         </button>
+                        {/** All blogs loaded */}
+                        {
+                            allShown && (
+                                <p className="text-gray-300 text-sm mt-3 italic">
+                                    You’re all caught up!
+                                </p>
+                            )
+                        }
                     </div>
                 </div>
             </div>
