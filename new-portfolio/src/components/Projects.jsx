@@ -1,12 +1,15 @@
 // components/Projects.jsx
 import React, { useEffect, useState } from 'react';
-import { fetchProjectEntries } from '../services/service.js';
+import { fetchProjectEntries, fetchProjectStackItems } from '../services/service.js';
 
 const filterOptions = ['All', 'Games', 'Collaborative', 'Personal'];
 
 export default function Projects() {
     const [projects, setProjects] = useState([]);
     const [activeFilter, setActiveFilter] = useState('All');
+    const [projectStackItems, setProjectStackItems] = useState([]);
+    const [activeProjectId, setActiveProjectId] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {
         fetchProjectEntries().then(entries => {
@@ -15,6 +18,16 @@ export default function Projects() {
             console.error("Error fetching projects:", error);
         })
     }, []);
+
+    useEffect(() => {
+        if (!activeProjectId) return;
+
+        fetchProjectStackItems(activeProjectId)
+            .then(setProjectStackItems).catch((err) => {
+                console.error("Error fetching stack items:", err);
+                setProjectStackItems([]);
+            });
+    }, [activeProjectId]) // runs everytime activeProjectId changes
 
     const filteredProjects = activeFilter === 'All'
         ? projects
@@ -75,8 +88,11 @@ export default function Projects() {
                 {/* Projects Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredProjects.map((project) => (
-                        <div key={project.id} className="group cursor-pointer relative overflow-hidden rounded-lg">
-                            {/* Large project image placeholder */}
+                        <div
+                            key={project.id}
+                            className="group cursor-pointer relative overflow-hidden rounded-lg"
+                        >
+                            {/* Banner */}
                             <div
                                 className="w-full h-64 bg-gray-400 flex items-center justify-center transition-all duration-300 group-hover:brightness-75 bg-center bg-cover"
                                 style={{
@@ -88,56 +104,111 @@ export default function Projects() {
                                 </span>
                             </div>
 
-
-                            {/* Hover overlay */}
-                            <div className="absolute inset-0 bg-black bg-opacity-60 flex flex-col
-                             items-center justify-center justify-around  w-full h-full
-                              opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            {/* Overlay */}
+                            <div className="absolute inset-0 bg-black bg-opacity-60 flex flex-col items-center justify-center justify-around w-full h-full opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                 <h3
                                     className="text-white font-semibold text-center px-4"
-                                    style={{
-                                        fontSize: '20px',
-                                        fontFamily: 'Rethink Sans, sans-serif'
-                                    }}
+                                    style={{ fontSize: '20px', fontFamily: 'Rethink Sans, sans-serif' }}
                                 >
                                     {project.projectDescription}
                                 </h3>
-                                <div className='flex flex-row gap-3'>
-                                    {
-                                        project.links.map((link) => {
-                                            return (
-                                                <a
-                                                    key={link.sys.id}
-                                                    className="flex items-center gap-2 text-white text-sm px-3 py-1 rounded transition-colors"
-                                                    style={{
-                                                        backgroundColor: link.fields?.linkBgcolor
-                                                    }}
-                                                    onMouseEnter={e => {
-                                                        e.currentTarget.style.backgroundColor = link.fields?.linkBgColorHover
-                                                    }}
-                                                    onMouseLeave={e => {
-                                                        e.currentTarget.style.backgroundColor = link.fields?.linkBgcolor
-                                                    }}
-                                                    href={link.fields?.url}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                >
-                                                    <img
-                                                        src={`https:${link.fields.logo?.fields?.file?.url}`}
-                                                        alt={link.fields.logo?.fields?.title || link.fields?.name}
-                                                        className="w-5 h-5"
-                                                    />
-                                                    <span>{link.fields?.tag}</span>
-                                                </a>
-                                            );
-                                        })
-                                    }
+
+                                <div className="flex flex-row gap-3">
+                                    {project.links.map((link) => (
+                                        <a
+                                            key={link.sys.id}
+                                            className="flex items-center gap-2 text-white text-sm px-3 py-1 rounded transition-colors"
+                                            style={{ backgroundColor: link.fields?.linkBgcolor }}
+                                            onMouseEnter={(e) =>
+                                            (e.currentTarget.style.backgroundColor =
+                                                link.fields?.linkBgColorHover)
+                                            }
+                                            onMouseLeave={(e) =>
+                                            (e.currentTarget.style.backgroundColor =
+                                                link.fields?.linkBgcolor)
+                                            }
+                                            href={link.fields?.url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                        >
+                                            <img
+                                                src={`https:${link.fields.logo?.fields?.file?.url}`}
+                                                alt={link.fields.logo?.fields?.title || link.fields?.name}
+                                                className="w-5 h-5"
+                                            />
+                                            <span>{link.fields?.tag}</span>
+                                        </a>
+                                    ))}
+
+                                    {/* Stack button */}
+                                    <button
+                                        className="flex items-center gap-2 text-white text-sm px-3 py-1 rounded transition-colors"
+                                        style={{ backgroundColor: "#e37665b3" }}
+                                        onMouseEnter={(e) =>
+                                        (e.currentTarget.style.backgroundColor =
+                                            "#e37665")
+                                        }
+                                        onMouseLeave={(e) =>
+                                        (e.currentTarget.style.backgroundColor =
+                                            "#e37665b3")
+                                        }
+                                        onClick={() => {
+                                            setActiveProjectId(project.id);
+                                            setIsModalOpen(true);
+                                        }}
+                                    >
+                                        Stack
+                                    </button>
                                 </div>
                             </div>
                         </div>
                     ))}
+
                 </div>
             </div>
+
+            {/* Modal */}
+            {isModalOpen && (
+                <div
+                    className="fixed inset-0 bg-black/70 flex items-center justify-center z-50"
+                    onClick={() => setIsModalOpen(false)} // close when clicking backdrop
+                >
+                    <div
+                        className="bg-[#18232D] p-6 rounded-xl shadow-lg w-96 relative"
+                        onClick={(e) => e.stopPropagation()} // prevent closing when clicking inside modal
+                    >
+                        {/* Close Button */}
+                        <button
+                            className="absolute top-3 right-3 text-gray-400 hover:text-white"
+                            onClick={() => setIsModalOpen(false)}
+                        >
+                            ❌
+                        </button>
+
+                        <h3 className="text-xl font-bold text-white mb-4">Project Stack</h3>
+                        <div className="space-y-3">
+                            {projectStackItems.length > 0 ? (
+                                projectStackItems.map((item, idx) => (
+                                    <div key={idx} className="flex items-center gap-3 text-white">
+                                        {item.logo && (
+                                            <img
+                                                src={item.logo}
+                                                alt={item.title}
+                                                className="w-6 h-6 object-contain"
+                                            />
+                                        )}
+                                        <span>{item.title}</span>
+                                    </div>
+                                ))
+                            ) : (
+                                <p className="text-gray-400">No stack items found.</p>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+
         </section>
     );
 }

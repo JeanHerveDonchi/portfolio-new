@@ -60,3 +60,21 @@ export const fetchBlogPostDetailsEntries = async (id) => {
     }
 }
 
+export const fetchProjectStackItems = async (projectId) => {
+    try {
+        if (projectId === null) {
+            return;
+        }
+        const entries = await client.withoutUnresolvableLinks.getEntries({
+            content_type: 'projects',
+        })
+        const project = entries.items.find(e => e.sys.id === projectId);
+        return project?.fields.stackItem.map(item => ({
+            title: item.fields.title,
+            logo: item.fields.logo?.fields?.file?.url
+        })) || [];
+    } catch (error) {
+        throw new Error(`Error fetching entries for content type ${error.message}`);
+    }
+}
+

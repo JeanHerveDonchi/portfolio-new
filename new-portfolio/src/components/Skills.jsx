@@ -36,7 +36,7 @@ const skillsData = [
     },
     {
         title: "Testing",
-        description: "I test products I build using tools like Selenium",
+        description: "I write unit tests in TypeScript, JavaScript, and .NET to ensure code quality and reliability",
         icon: GrTest
     }
 ];
