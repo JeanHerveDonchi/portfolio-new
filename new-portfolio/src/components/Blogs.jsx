@@ -1,16 +1,16 @@
-// components/Blogs.jsx
 import React, { useEffect, useState } from 'react';
 import { fetchBlogPostEntries } from '../services/service';
-import { Link } from 'react-router-dom';
-
-
+import { useNavigate } from 'react-router-dom';
+import { motion } from "motion/react"
 
 
 export default function Blogs() {
-
     const [visibleCount, setVisibleCount] = useState(2);
     const [allShown, setAllShown] = useState(false);
     const [blogPosts, setBlogPosts] = useState([]);
+    const [activeBlogId, setActiveBlogId] = useState(null);
+    const [isMobile, setIsMobile] = useState(false);
+    const navigate = useNavigate();
 
     useEffect(() => {
         fetchBlogPostEntries().then(entries => {
@@ -20,7 +20,15 @@ export default function Blogs() {
         })
     }, []);
 
-    // Take only the first 2 blog posts
+    // Detect screen size
+    useEffect(() => {
+        const checkScreen = () => setIsMobile(window.innerWidth < 768);
+        checkScreen();
+        window.addEventListener("resize", checkScreen);
+        return () => window.removeEventListener("resize", checkScreen);
+    }, []);
+
+    // Sort and slice blogs
     const displayedBlogs = blogPosts
         .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
         .slice(0, visibleCount);
@@ -54,24 +62,49 @@ export default function Blogs() {
                 <div className="flex flex-col lg:flex-row items-start lg:items-center gap-6">
                     {/* Blog Cards */}
                     <div className="w-full lg:flex-1 grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {displayedBlogs
-                            .map((blog) => (
-                                <Link
+                        {displayedBlogs.map((blog) => (
+                            <motion.div
+                                initial={{ opacity: 0, y: 30 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.5 }}
+                                viewport={{ once: true }}
+                            >
+                                <div
                                     key={blog.id}
-                                    to={`/blog/${blog.id}`}
                                     className="group cursor-pointer relative overflow-hidden rounded-lg w-full"
+                                    onClick={(e) => {
+                                        if (isMobile) {
+                                            if (activeBlogId !== blog.id) {
+                                                e.preventDefault();
+                                                setActiveBlogId(blog.id); // first tap → show overlay
+                                            } else {
+                                                navigate(`/blog/${blog.id}`); // second tap → go to post
+                                            }
+                                        }
+                                    }}
                                 >
-                                    {/* Blog banner image placeholder with more height and full width on mobile */}
-                                    <div className="w-full h-56 bg-gray-400 flex items-center justify-center transition-all duration-300 group-hover:brightness-75 bg-center bg-cover"
+                                    {/* Blog banner image */}
+                                    <div
+                                        className="w-full h-56 bg-gray-400 flex items-center justify-center transition-all duration-300 group-hover:brightness-75 bg-center bg-cover"
                                         style={{
                                             backgroundImage: `url(${blog.coverImage?.file?.url ? `https:${blog.coverImage?.file?.url}` : 'https://via.placeholder.com/400x300'})`
                                         }}
                                     >
-                                        <span className="text-gray-700 text-sm bg-white/70 px-3 py-1 rounded">{blog.title}</span>
+                                        <span className="text-gray-700 text-sm bg-white/70 px-3 py-1 rounded">
+                                            {blog.title}
+                                        </span>
                                     </div>
 
-                                    {/* Hover overlay */}
-                                    <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                    {/* Overlay */}
+                                    <div
+                                        className={`
+                                        absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center 
+                                        transition-opacity duration-300
+                                        ${isMobile
+                                                ? activeBlogId === blog.id ? "opacity-100" : "opacity-0"
+                                                : "opacity-0 group-hover:opacity-100"}
+                                    `}
+                                    >
                                         <span
                                             className="text-white font-medium"
                                             style={{
@@ -82,16 +115,26 @@ export default function Blogs() {
                                             Read Post
                                         </span>
                                     </div>
+
                                     {/* Category label */}
-                                    <div className="absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                    <div
+                                        className={`
+                                        absolute bottom-2 left-2 transition-opacity duration-300
+                                        ${isMobile
+                                                ? activeBlogId === blog.id ? "opacity-100" : "opacity-0"
+                                                : "opacity-0 group-hover:opacity-100"}
+                                    `}
+                                    >
                                         <span className="text-xs text-white bg-red-900 px-2 py-1 rounded">
                                             {blog.category}
                                         </span>
                                     </div>
-                                </Link>
-                            ))}
+                                </div>
+                            </motion.div>
+                        ))}
                     </div>
 
+                    {/* Load more button */}
                     <div className="lg:ml-6">
                         <button
                             className="text-white px-8 py-3 transition-all duration-300"
@@ -112,14 +155,11 @@ export default function Blogs() {
                         >
                             more
                         </button>
-                        {/** All blogs loaded */}
-                        {
-                            allShown && (
-                                <p className="text-gray-300 text-sm mt-3 italic">
-                                    You’re all caught up!
-                                </p>
-                            )
-                        }
+                        {allShown && (
+                            <p className="text-gray-300 text-sm mt-3 italic">
+                                You’re all caught up!
+                            </p>
+                        )}
                     </div>
                 </div>
             </div>

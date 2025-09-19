@@ -1,6 +1,8 @@
 // components/Navbar.jsx (With Mobile Responsiveness)
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { motion } from "motion/react";
+
 
 export default function Navbar() {
     const [activeSection, setActiveSection] = useState('home');
@@ -51,78 +53,82 @@ export default function Navbar() {
     };
 
     return (
-        <nav className="w-full flex items-center justify-between px-6 py-4 fixed top-0 z-50 shadow-sm"
-            style={{ backgroundColor: '#101F28', fontFamily: 'Rethink Sans, sans-serif', fontWeight: '600' }}>
+        <motion.nav>
 
-            {/* Brand Name */}
-            <div className="navbar-brand">
-                <Link
-                    key={navItems[0].id}
-                    to={navItems[0].href}
-                    className="text-xl font-bold text-white">
-                    Jean-Herve Donchi
-                </Link> 
-            </div>
 
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex space-x-8">
-                {navItems.map((item) => {
-                    const isActive = activeSection === item.id;
-                    return (
-                        <Link
-                            key={item.id}
-                            to={`${item.href}`}
-                            onClick={() => handleNavClick(item.id)}
-                            className="text-white px-4 py-2 rounded-full transition-all duration-300"
-                            style={getNavItemStyle(isActive)}
-                            onMouseEnter={(e) => handleMouseEnter(e, isActive)}
-                            onMouseLeave={(e) => handleMouseLeave(e, isActive)}
-                        >
-                            {item.label}
-                        </Link>
-                    );
-                })}
-            </div>
+            <nav className="w-full flex items-center justify-between px-6 py-4 fixed top-0 z-50 shadow-sm"
+                style={{ backgroundColor: '#101F28', fontFamily: 'Rethink Sans, sans-serif', fontWeight: '600' }}>
 
-            {/* Mobile Hamburger Button */}
-            <div className="md:hidden">
-                <button
-                    onClick={toggleMobileMenu}
-                    className="p-2 rounded"
-                    style={{ backgroundColor: '#14191D' }}
-                >
-                    <div className="w-6 h-6 flex flex-col justify-center items-center space-y-1">
-                        <div className="w-5 h-0.5 bg-white transition-all duration-300"></div>
-                        <div className="w-5 h-0.5 bg-white transition-all duration-300"></div>
-                        <div className="w-5 h-0.5 bg-white transition-all duration-300"></div>
-                    </div>
-                </button>
-            </div>
-
-            {/* Mobile Menu Dropdown */}
-            {isMobileMenuOpen && (
-                <div
-                    className="absolute top-full left-0 w-full md:hidden"
-                    style={{ backgroundColor: '#101F28' }}
-                >
-                    <div className="flex flex-col space-y-2 px-6 py-4">
-                        {navItems.map((item) => {
-                            const isActive = activeSection === item.id;
-                            return (
-                                <Link
-                                    key={item.id}
-                                    to={`${item.href}`}
-                                    onClick={() => handleNavClick(item.id)}
-                                    className="text-white px-4 py-3 rounded-full transition-all duration-300"
-                                    style={getNavItemStyle(isActive)}
-                                >
-                                    {item.label}
-                                </Link>
-                            );
-                        })}
-                    </div>
+                {/* Brand Name */}
+                <div className="navbar-brand">
+                    <Link
+                        key={navItems[0].id}
+                        to={navItems[0].href}
+                        className="text-xl font-bold text-white">
+                        Jean-Herve Donchi
+                    </Link>
                 </div>
-            )}
-        </nav>
+
+                {/* Desktop Navigation */}
+                <div className="hidden md:flex space-x-8">
+                    {navItems.map((item) => {
+                        const isActive = activeSection === item.id;
+                        return (
+                            <Link
+                                key={item.id}
+                                to={`${item.href}`}
+                                onClick={() => handleNavClick(item.id)}
+                                className="text-white px-4 py-2 rounded-full transition-all duration-300"
+                                style={getNavItemStyle(isActive)}
+                                onMouseEnter={(e) => handleMouseEnter(e, isActive)}
+                                onMouseLeave={(e) => handleMouseLeave(e, isActive)}
+                            >
+                                {item.label}
+                            </Link>
+                        );
+                    })}
+                </div>
+
+                {/* Mobile Hamburger Button */}
+                <div className="md:hidden">
+                    <button
+                        onClick={toggleMobileMenu}
+                        className="p-2 rounded"
+                        style={{ backgroundColor: '#14191D' }}
+                    >
+                        <div className="w-6 h-6 flex flex-col justify-center items-center space-y-1">
+                            <div className="w-5 h-0.5 bg-white transition-all duration-300"></div>
+                            <div className="w-5 h-0.5 bg-white transition-all duration-300"></div>
+                            <div className="w-5 h-0.5 bg-white transition-all duration-300"></div>
+                        </div>
+                    </button>
+                </div>
+
+                {/* Mobile Menu Dropdown */}
+                {isMobileMenuOpen && (
+                    <div
+                        className="absolute top-full left-0 w-full md:hidden"
+                        style={{ backgroundColor: '#101F28' }}
+                    >
+                        <div className="flex flex-col space-y-2 px-6 py-4">
+                            {navItems.map((item) => {
+                                const isActive = activeSection === item.id;
+                                return (
+                                    <Link
+                                        key={item.id}
+                                        to={`${item.href}`}
+                                        onClick={() => handleNavClick(item.id)}
+                                        className="text-white px-4 py-3 rounded-full transition-all duration-300"
+                                        style={getNavItemStyle(isActive)}
+                                    >
+                                        {item.label}
+                                    </Link>
+                                );
+                            })}
+                        </div>
+                    </div>
+                )}
+            </nav>
+        </motion.nav>
     );
 }

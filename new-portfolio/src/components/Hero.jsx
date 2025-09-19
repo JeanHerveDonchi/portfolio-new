@@ -1,6 +1,15 @@
 // components/Hero.jsx
-import React from 'react';
 import { FaLinkedin, FaGithub } from "react-icons/fa";
+import { ReactTyped } from "react-typed";
+import { motion } from "motion/react"
+
+const titles = [
+    "Backend Developer",
+    "Solutions Crafter",
+    "API Architect",
+    "Problem Solver",
+    "Software Engineer",
+];
 
 export default function Hero() {
     return (
@@ -15,14 +24,31 @@ export default function Hero() {
             <div className="max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
                 <div className="space-y-6">
                     <div className="space-y-2">
-                        <h1 className="text-2xl md:text-3xl text-white">Hi</h1>
-                        <h1 className="text-4xl md:text-5xl font-semibold text-white">I'm Jean</h1>
-                        <p className="text-lg md:text-xl text-white">
-                            Highly Passionate
-                        </p>
-                        <p className="text-3xl md:text-4xl font-bold text-white">
-                            Backend Developer
-                        </p>
+                        <motion.h1
+                            initial={{ opacity: 0, y: 40 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.8 }}>
+                            <h1 className="text-2xl md:text-3xl text-white">Hi</h1>
+                            <h1 className="text-4xl md:text-5xl font-semibold text-white">I'm Jean</h1>
+                        </motion.h1>
+                        <motion.p
+                            initial={{ opacity: 0, y: 40 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.8 }}>
+                            <p className="text-lg md:text-xl text-white">
+                                Highly Passionate
+                            </p>
+                            <p className="text-3xl md:text-4xl font-bold text-white">
+                                <ReactTyped
+                                    strings={titles}
+                                    typeSpeed={60}
+                                    backSpeed={40}
+                                    backDelay={1500}
+                                    loop
+                                />
+                            </p>
+                        </motion.p>
+
                     </div>
 
                     <div className="flex flex-col sm:flex-row gap-4 items-start">
@@ -45,7 +71,7 @@ export default function Hero() {
                                     e.preventDefault();
                                     const el = document.getElementById("contact");
                                     if (el) {
-                                        el.scrollIntoView({behavior: "smooth"})
+                                        el.scrollIntoView({ behavior: "smooth" })
                                     } else {
                                         window.location.href = "/contact";
                                     }

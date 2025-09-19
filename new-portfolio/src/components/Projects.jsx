@@ -1,6 +1,7 @@
 // components/Projects.jsx
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { fetchProjectEntries, fetchProjectStackItems } from '../services/service.js';
+import { motion } from "motion/react"
 
 const filterOptions = ['All', 'Games', 'Collaborative', 'Personal'];
 
@@ -10,7 +11,9 @@ export default function Projects() {
     const [projectStackItems, setProjectStackItems] = useState([]);
     const [activeProjectId, setActiveProjectId] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isMobile, setIsMobile] = useState(false);
 
+    //fetch projects
     useEffect(() => {
         fetchProjectEntries().then(entries => {
             setProjects(entries);
@@ -19,6 +22,7 @@ export default function Projects() {
         })
     }, []);
 
+    //fetch project stack items for selected project
     useEffect(() => {
         if (!activeProjectId) return;
 
@@ -28,6 +32,14 @@ export default function Projects() {
                 setProjectStackItems([]);
             });
     }, [activeProjectId]) // runs everytime activeProjectId changes
+
+    //detect screen size
+    useEffect(() => {
+        const checkScreen = () => setIsMobile(window.innerWidth < 768);
+        checkScreen();
+        window.addEventListener("resize", checkScreen); // check screen each time event 'resize' happens
+        return () => window.removeEventListener("resize", checkScreen);
+    }, []);
 
     const filteredProjects = activeFilter === 'All'
         ? projects
@@ -88,80 +100,103 @@ export default function Projects() {
                 {/* Projects Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredProjects.map((project) => (
-                        <div
-                            key={project.id}
-                            className="group cursor-pointer relative overflow-hidden rounded-lg"
+                        <motion.div
+                            initial={{ opacity: 0, y: 30 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5 }}
+                            viewport={{ once: true }}
                         >
-                            {/* Banner */}
                             <div
-                                className="w-full h-64 bg-gray-400 flex items-center justify-center transition-all duration-300 group-hover:brightness-75 bg-center bg-cover"
-                                style={{
-                                    backgroundImage: `url(${project.banner?.file?.url ? `https:${project.banner.file.url}` : 'https://via.placeholder.com/400x300'})`
+                                key={project.id}
+                                className="group cursor-pointer relative overflow-hidden rounded-lg"
+                                onClick={(e) => {
+                                    if (isMobile) {
+                                        // first tap on mobile
+                                        if (activeProjectId !== project.id) {
+                                            e.preventDefault();
+                                            setActiveProjectId(project.id);
+                                        }
+                                    }
                                 }}
                             >
-                                <span className="text-gray-700 text-sm bg-white/70 px-3 py-1 rounded">
-                                    {project.projectName}
-                                </span>
-                            </div>
-
-                            {/* Overlay */}
-                            <div className="absolute inset-0 bg-black bg-opacity-60 flex flex-col items-center justify-center justify-around w-full h-full opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                <h3
-                                    className="text-white font-semibold text-center px-4"
-                                    style={{ fontSize: '20px', fontFamily: 'Rethink Sans, sans-serif' }}
+                                {/* Banner */}
+                                <div
+                                    className="w-full h-64 bg-gray-400 flex items-center justify-center transition-all duration-300 group-hover:brightness-75 bg-center bg-cover"
+                                    style={{
+                                        backgroundImage: `url(${project.banner?.file?.url ? `https:${project.banner.file.url}` : 'https://via.placeholder.com/400x300'})`
+                                    }}
                                 >
-                                    {project.projectDescription}
-                                </h3>
+                                    <span className="text-gray-700 text-sm bg-white/70 px-3 py-1 rounded">
+                                        {project.projectName}
+                                    </span>
+                                </div>
 
-                                <div className="flex flex-row gap-3">
-                                    {project.links.map((link) => (
-                                        <a
-                                            key={link.sys.id}
+                                {/* Overlay */}
+                                <div className={`absolute inset-0 bg-black bg-opacity-60 
+                            flex flex-col items-center justify-center
+                             justify-around w-full h-full 
+                              transition-opacity duration-300
+                             ${isMobile ? activeProjectId === project.id ? "opacity-100" : "opacity-0"
+                                        : "opacity-0 group-hover:opacity-100"
+                                    }
+                             `}>
+                                    <h3
+                                        className="text-white font-semibold text-center px-4"
+                                        style={{ fontSize: '20px', fontFamily: 'Rethink Sans, sans-serif' }}
+                                    >
+                                        {project.projectDescription}
+                                    </h3>
+
+                                    <div className="flex flex-row gap-3">
+                                        {project.links.map((link) => (
+                                            <a
+                                                key={link.sys.id}
+                                                className="flex items-center gap-2 text-white text-sm px-3 py-1 rounded transition-colors"
+                                                style={{ backgroundColor: link.fields?.linkBgcolor }}
+                                                onMouseEnter={(e) =>
+                                                (e.currentTarget.style.backgroundColor =
+                                                    link.fields?.linkBgColorHover)
+                                                }
+                                                onMouseLeave={(e) =>
+                                                (e.currentTarget.style.backgroundColor =
+                                                    link.fields?.linkBgcolor)
+                                                }
+                                                href={link.fields?.url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                            >
+                                                <img
+                                                    src={`https:${link.fields.logo?.fields?.file?.url}`}
+                                                    alt={link.fields.logo?.fields?.title || link.fields?.name}
+                                                    className="w-5 h-5"
+                                                />
+                                                <span>{link.fields?.tag}</span>
+                                            </a>
+                                        ))}
+
+                                        {/* Stack button */}
+                                        <button
                                             className="flex items-center gap-2 text-white text-sm px-3 py-1 rounded transition-colors"
-                                            style={{ backgroundColor: link.fields?.linkBgcolor }}
+                                            style={{ backgroundColor: "#e37665b3" }}
                                             onMouseEnter={(e) =>
                                             (e.currentTarget.style.backgroundColor =
-                                                link.fields?.linkBgColorHover)
+                                                "#e37665")
                                             }
                                             onMouseLeave={(e) =>
                                             (e.currentTarget.style.backgroundColor =
-                                                link.fields?.linkBgcolor)
+                                                "#e37665b3")
                                             }
-                                            href={link.fields?.url}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
+                                            onClick={() => {
+                                                setActiveProjectId(project.id);
+                                                setIsModalOpen(true);
+                                            }}
                                         >
-                                            <img
-                                                src={`https:${link.fields.logo?.fields?.file?.url}`}
-                                                alt={link.fields.logo?.fields?.title || link.fields?.name}
-                                                className="w-5 h-5"
-                                            />
-                                            <span>{link.fields?.tag}</span>
-                                        </a>
-                                    ))}
-
-                                    {/* Stack button */}
-                                    <button
-                                        className="flex items-center gap-2 text-white text-sm px-3 py-1 rounded transition-colors"
-                                        style={{ backgroundColor: "#e37665b3" }}
-                                        onMouseEnter={(e) =>
-                                        (e.currentTarget.style.backgroundColor =
-                                            "#e37665")
-                                        }
-                                        onMouseLeave={(e) =>
-                                        (e.currentTarget.style.backgroundColor =
-                                            "#e37665b3")
-                                        }
-                                        onClick={() => {
-                                            setActiveProjectId(project.id);
-                                            setIsModalOpen(true);
-                                        }}
-                                    >
-                                        Stack
-                                    </button>
+                                            Stack
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        </motion.div>
                     ))}
 
                 </div>
