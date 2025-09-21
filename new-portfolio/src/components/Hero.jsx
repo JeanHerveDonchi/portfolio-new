@@ -80,6 +80,14 @@ export default function Hero() {
                                 Got a project?
                             </button>
                             <button
+                                onClick={() => {
+                                    const link = document.createElement("a");
+                                    link.href = "/files/jean-donchi-cv.pdf";
+                                    link.download = "Jean_Donchi_Resume.pdf";
+                                    document.body.appendChild(link);
+                                    link.click();
+                                    document.body.removeChild(link);
+                                }}  
                                 className="text-white px-8 py-3 transition-all duration-300"
                                 style={{
                                     backgroundColor: 'transparent',
