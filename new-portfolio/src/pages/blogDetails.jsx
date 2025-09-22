@@ -1,4 +1,4 @@
-import Navbar from "../components/Navbar";
+import Navbar from "../components/Navbar.jsx";
 import Footer from "../components/Footer";
 import { useParams, useNavigate } from "react-router-dom";
 import React, { useState, useEffect } from "react";
