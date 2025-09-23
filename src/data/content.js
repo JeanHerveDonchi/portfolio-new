@@ -1,4 +1,4 @@
-import * as contentful from 'contentful';
+import {createClient} from 'contentful';
 
 export const client = contentful.createClient({
     space: 'p2usjomnse8z',
