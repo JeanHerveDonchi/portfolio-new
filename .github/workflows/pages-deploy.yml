@@ -1,56 +1,56 @@
-name: Build and Deploy to GitHub Pages
+name: "Deploy to GitHub Pages"
 
 on:
   push:
-    branches:
-      - prod  # This will trigger on pushes to prod branch
-  workflow_dispatch:  # Allows manual triggering
+    branches: ["prod"]
+  workflow_dispatch:
 
-# Grant required permissions
 permissions:
   contents: read
   pages: write
   id-token: write
 
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
+      
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'npm'  # Speeds up builds
-
+          cache: npm
+      
       - name: Install dependencies
         run: npm ci
-
-      - name: Build project
+      
+      - name: Build
         run: npm run build
-
+      
       - name: Setup Pages
         uses: actions/configure-pages@v5
-
+      
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v4
         with:
-          # Adjust this path based on your build tool:
-          # Create React App: ./build
-          # Vite: ./dist
-          # Next.js: ./out (if using static export)
           path: ./build
 
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      pages: write
+      id-token: write
+    steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
